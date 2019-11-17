@@ -1,4 +1,4 @@
-import {backend_url} from "./settings.js"
+import {backend_url, starwars_url} from "./settings.js"
 
 function handleHttpErrors(res) {
 	if (!res.ok) {
@@ -36,6 +36,11 @@ function apiFacade() {
 		return fetch(backend_url + "/api/info/" + user, options).then(handleHttpErrors);
 	};
 
+	const fetchData_API = () => {
+		const options = makeOptions("GET", true);
+		return fetch(starwars_url, options).then(handleHttpErrors);
+	};
+
 	const makeOptions = (method, addToken, body) => {
 		var opts = {
 			method: method,
@@ -52,6 +57,10 @@ function apiFacade() {
 		}
 		return opts;
 	}
+
+
+
+	
 	return {
 		makeOptions,
 		setToken,
@@ -59,9 +68,12 @@ function apiFacade() {
 		loggedIn,
 		login,
 		logout,
-		fetchData
+		fetchData,
+		fetchData_API
 	}
 }
+
+
 
 const facade = apiFacade();
 export default facade;

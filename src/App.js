@@ -52,50 +52,57 @@ function LoggedIn({user}) {
 
 	return (
 		<div>
-			<h2>Data Received from server</h2>
-			<h3>{dataFromServer}</h3>
+			{dataFromServer}
 		</div>
 	)
 }
 
-const Header = () => {
+const FetchData = ({user}) => {
+  const [Data, setData] = useState([]);
+
+  useEffect(() => {
+    facade.fetchData_API(user).then(data => setData(data));
+  }, [user]);
+
   return (
-    <ul className="header">
-      <li>
-        <NavLink exact to="/">Startside</NavLink>
-      </li>
-      <li>
-        <NavLink to="/topics">REST 1</NavLink>
-      </li>
-      <li>
-        <NavLink to="/rest2">REST 2</NavLink>
-      </li>
-      <li>
-        <NavLink to="/rest3">REST 3</NavLink>
-      </li>
-    </ul>
+    <div>
+      <h2>Star Wars API:</h2>
+      <p>{Data.map((data, index) => <li key={index}>{data}</li>)}</p>
+    </div>
   )
 }
 
-export default function NestingExample(props) {
-  const {info} = props;
+const Header = () => {
+  return (
+    <div>
+          <ul className="header">
+            <li><NavLink exact to="/">Startside</NavLink></li>
+            <li><NavLink exact to="/api">API</NavLink></li>
+          </ul>
+    </div>
+  )
+}
+
+
+export default function App(){
   return (
     <Router>
       <div>
-      <Header />
+
+      <Header/>
         <hr />
 
         <Switch>
           <Route exact path="/">
             <Home />
           </Route>
-          <Route path="/topics">
-            <Topics info={info}/>
+          <Route path="/api">
+            <API/>
           </Route>
         </Switch>
       </div>
     </Router>
-  );
+  )
 }
 
 function Home() {
@@ -109,10 +116,13 @@ function Home() {
 	const login = (user, pass) => {
 		facade.login(user, pass)
 			.then(res => setLoggedIn(true));
-		setUser(user);
-	}
+    setUser(user);
 
+  }
+  const token = localStorage.getItem("jwtToken");
+  
   return (
+    
     <div>
       <h2>Velkommen til CA3</h2>
       <hr/>
@@ -120,8 +130,13 @@ function Home() {
 
       {!loggedIn ? (<LogIn login={login} />) :
         (<div>
-          <LoggedIn user={user} />
           <p className="LoggedInP">Du er nu logget ind</p>
+          <hr/>
+          <p>Serveren svarede: </p>
+          <p style={{fontSize: "12px"}}><LoggedIn user={user} /></p>
+          
+          {/* <p style={{fontSize: "12px"}}>Token: {token}</p> */}
+
           <button onClick={logout}>Log ud</button>
         </div>)}
       
@@ -129,46 +144,9 @@ function Home() {
   );
 }
 
-function Topics(props) {
-  const {info} = props;
-
-  let { path, url } = useRouteMatch()
-  const x = useRouteMatch()
-  console.log("-->", x)
-
-  const listItems = info.map(t => <li key={t.id}><NavLink to={`${url}/${t.id}`}>{t.title}</NavLink></li>)
+function API(){
 
   return (
-    <div>
-      <h2>Topics</h2>
-      <p>Count: {info.length}</p>
-      <ul>
-        {listItems}
-      </ul>
-
-      <Switch>
-        <Route exact path={path}>
-          <h3>Please select a topic.</h3>
-        </Route>
-        <Route path={`${path}/:topicId`}>
-          <Topic info={info}/>
-        </Route>
-      </Switch>
-    </div>
-  );
-}
-
-function Topic({info}) {
-
-  let { topicId } = useParams();
-  const topic = info.find((t) => t.id === topicId);
-  
-
-  return (
-    <div>
-      <h3>{topicId}</h3>
-      <p>{topic.title}</p>
-      <p>{topic.info}</p>
-    </div>
-  );
+    <FetchData />
+  )
 }
